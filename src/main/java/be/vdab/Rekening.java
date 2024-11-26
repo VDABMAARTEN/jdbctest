@@ -23,7 +23,7 @@ public class Rekening {
 
     //    set rekeningnummer + voeg toe aan de database
 
-    static void setRekeningNummer(String reknr) throws IllegalArgumentException {
+    private static void setRekeningNummer(String reknr) throws IllegalArgumentException {
         rekeningNummer = reknr;
         var repository = new RekeningRepository();
         try {

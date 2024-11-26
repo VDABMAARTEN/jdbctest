@@ -101,7 +101,7 @@ public class RekeningRepository extends AbstractRepository {
             connection.commit();
 
         }
-
+//          ALS OK DAN KAN JE UITVOEREN
         try (var connection = super.getConnection();
              var statementVerminderen = connection.prepareStatement(sqlVerminderen);
              var statementToevoegen = connection.prepareStatement(sqlToevoegen)) {

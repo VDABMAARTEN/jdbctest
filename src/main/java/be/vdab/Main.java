@@ -42,21 +42,23 @@ public class Main {
             case (3) -> {
                 System.out.println("Typ het rekeningnummer vanwaar je wil overschrijven");
                 var vanRekeningNummer = scanner.next();
-                while (controleRekeningNummer(vanRekeningNummer) == false) {
-                    System.out.println("Rekeningnummer is niet correct. Probeer opnieuw.");
-                    vanRekeningNummer = scanner.next();
+                if (controleRekeningNummer(vanRekeningNummer) == false){
+                    throw new IllegalArgumentException("Rekeningnummer is niet correct");
                 }
+                zitHetRekeningNummerAlInDeDatabase(vanRekeningNummer);
+
+
                 System.out.println("Typ het rekeningnummer waarnaar je wil overschrijven");
                 var naarRekeningNummer = scanner.next();
-                while (controleRekeningNummer(naarRekeningNummer) == false) {
-                    System.out.println("Rekeningnummer is niet correct. Probeer opnieuw.");
-                    naarRekeningNummer = scanner.next();
+                if (controleRekeningNummer(naarRekeningNummer) == false){
+                    throw new IllegalArgumentException("Rekeningnummer is niet correct");
                 }
+                zitHetRekeningNummerAlInDeDatabase(naarRekeningNummer);
 
                 System.out.println("Typ het bedrag dat je wil overschrijven");
                 var bedrag = scanner.nextDouble();
                 while (bedrag <= 0) {
-                    System.out.println("FOUT: bedrag moet groter zijn dan 0. Geef een nieuwe bedrag in.");
+                    System.out.println("FOUT: bedrag moet groter zijn dan 0. Geef een nieuw bedrag in.");
                     bedrag = scanner.nextDouble();
                 }
 
@@ -68,7 +70,6 @@ public class Main {
                     e.printStackTrace(System.err);
                 }
 
-
             }
             default -> System.out.println("Verkeerde input. Start het programma opnieuw en kies 1,2 of 3");
 
@@ -76,12 +77,14 @@ public class Main {
     }
 
 
+
+
     static boolean controleRekeningNummer(String rek) {
 
-        //          Begin met controle dmv regex
+//          Begin met controle dmv regex
         final Pattern PATTERN = Pattern.compile("^BE\\d{14}");
         var matcher = PATTERN.matcher(rek);
-//          Als rekeningnummer aan het patroon voldoet dan proberen we er een rekening van te maken
+
         if (matcher.matches()) {
 //            eerste controle op cijfer 3 en 4 samen kleiner zijn dan 2 of groter dan 98
             var controle1Int = Long.parseLong(rek.substring(2, 4));
@@ -92,21 +95,11 @@ public class Main {
                 controle2.append(rek.substring(2, 4));
                 var controle2Long = Long.parseLong(controle2.toString());
                 if (controle2Long % 97 == 1) {
-//                    ZIT HET NUMMER AL IN DE DATABASE?
-                    var repository = new RekeningRepository();
-                    try{
-                        if(repository.rekeningBestaat(rek)){
-                            return true;
-                        }
-                        else{
-                            throw new IllegalArgumentException("Rekeningnummer zit niet in de database");
-                        }
-                    } catch (SQLException e) {
-                        e.printStackTrace(System.err);
-                    }
+                    return true;
 
-                } else
-                {return false;}
+                } else {
+                    return false;
+                }
 
             } else {
                 return false;
@@ -119,9 +112,18 @@ public class Main {
                     "                     \n3.De rest van de tekens zijn cijfers" +
                     "                     \n4.Geen spaties, geen streepjes: BEXXXXXXXXXXXXXX");
         }
-
-
     }
 
 
+
+    static void zitHetRekeningNummerAlInDeDatabase(String rek){
+        var repository = new RekeningRepository();
+        try {
+            if (!repository.rekeningBestaat(rek)) {
+                throw new IllegalArgumentException("Rekeningnummer bestaat niet");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace(System.err);
+        }
+    }
 }
